@@ -117,34 +117,49 @@ class _NeumorphicContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final shape = this.style.boxShape ?? NeumorphicBoxShape.rect();
 
+    final Widget clippedChild = NeumorphicBoxShapeClipper(
+      shape: shape,
+      child: Padding(
+        padding: this.padding,
+        child: this.child,
+      ),
+    );
+
+    final foregroundDecoration = NeumorphicDecoration(
+      isForeground: true,
+      renderingByPath: shape.customShapePathProvider.oneGradientPerPath,
+      splitBackgroundForeground: this.drawSurfaceAboveChild,
+      style: this.style,
+      shape: shape,
+    );
+
+    final backgroundDecoration = NeumorphicDecoration(
+      isForeground: false,
+      renderingByPath: shape.customShapePathProvider.oneGradientPerPath,
+      splitBackgroundForeground: this.drawSurfaceAboveChild,
+      style: this.style,
+      shape: shape,
+    );
+
+    final Widget box = (this.duration == Duration.zero)
+        ? Container(
+            margin: this.margin,
+            foregroundDecoration: foregroundDecoration,
+            decoration: backgroundDecoration,
+            child: clippedChild,
+          )
+        : AnimatedContainer(
+            margin: this.margin,
+            duration: this.duration,
+            curve: this.curve,
+            foregroundDecoration: foregroundDecoration,
+            decoration: backgroundDecoration,
+            child: clippedChild,
+          );
+
     return DefaultTextStyle(
       style: this.textStyle ?? material.Theme.of(context).textTheme.bodyMedium!,
-      child: AnimatedContainer(
-        margin: this.margin,
-        duration: this.duration,
-        curve: this.curve,
-        child: NeumorphicBoxShapeClipper(
-          shape: shape,
-          child: Padding(
-            padding: this.padding,
-            child: this.child,
-          ),
-        ),
-        foregroundDecoration: NeumorphicDecoration(
-          isForeground: true,
-          renderingByPath: shape.customShapePathProvider.oneGradientPerPath,
-          splitBackgroundForeground: this.drawSurfaceAboveChild,
-          style: this.style,
-          shape: shape,
-        ),
-        decoration: NeumorphicDecoration(
-          isForeground: false,
-          renderingByPath: shape.customShapePathProvider.oneGradientPerPath,
-          splitBackgroundForeground: this.drawSurfaceAboveChild,
-          style: this.style,
-          shape: shape,
-        ),
-      ),
+      child: box,
     );
   }
 }
